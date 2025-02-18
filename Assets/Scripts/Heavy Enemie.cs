@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using static UnityEngine.GraphicsBuffer;
 
 public class EnemyAI : MonoBehaviour
@@ -10,12 +11,19 @@ public class EnemyAI : MonoBehaviour
     public float obstacleDetectionDistance = 1f;
     public LayerMask obstacleMask;
     public Transform playerTransform;
+    public int maxHealth = 20;
+    private int currentHealth;
+    public float flashDuration = 0;
+    public Color originalColor = Color.white;
+    private SpriteRenderer spriteColor;
 
     private void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
-        playerTransform = player.GetComponent<Transform>();
-        
+        playerTransform = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
+        spriteColor = GetComponent<SpriteRenderer>();
+        currentHealth = maxHealth;
+
     }
     void Update()
     {
@@ -44,5 +52,38 @@ public class EnemyAI : MonoBehaviour
             return -direction * avoidanceForce; // Se mueve en dirección contraria al obstáculo
         }
         return Vector2.zero;
+    }
+
+    void Die()
+    {
+        Debug.Log("El jugador ha muerto.");
+        gameObject.SetActive(false); // Desactiva el jugador
+    }
+
+    private IEnumerator TakeDamage(int damage)
+    {
+        currentHealth -= damage;
+        Debug.Log("Vida restante: " + currentHealth);
+
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+
+        spriteColor.color = Color.red; // Cambia a rojo
+        yield return new WaitForSeconds(flashDuration); // Espera un momento
+        spriteColor.color = originalColor; // Vuelve al color original
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        Debug.Log("CollisionEnemy");
+
+        if (other.CompareTag("Bullet")) // Si choca con un objeto con etiqueta "Enemy"
+        {
+            //TakeDamage(2);
+            StartCoroutine(TakeDamage(other.GetComponent<bulletController>().damage));
+        }
     }
 }

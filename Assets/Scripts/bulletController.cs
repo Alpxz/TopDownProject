@@ -19,7 +19,8 @@ public class bulletController : MonoBehaviour
     }
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag(tagFind) && !gameObject.CompareTag("RedBullet")) // Evitar destruir si colisiona con el Player
+        Debug.Log("BulletCoallision");
+        if (!other.CompareTag(tagFind) && !other.CompareTag("RedBullet")) // Evitar destruir si colisiona con el Player
         {
             Destroy(gameObject);
         }
